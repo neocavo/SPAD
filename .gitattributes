@@ -1,2 +1,9 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+__pycache__/
+*.pyc
+venv/
+.idea/
+.vscode/
+.DS_Store
+build/
+bin/
+*.log
