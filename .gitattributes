@@ -7,3 +7,5 @@ venv/
 build/
 bin/
 *.log
+*.txt
+household_power_consumption.txt
