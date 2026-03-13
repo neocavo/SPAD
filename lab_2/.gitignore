@@ -1,2 +1,6 @@
+.ipynb_checkpoints/
+vhi_data/
+venv/
 *.txt
-household_power_consumption.txt
+*.csv
+*.log
