@@ -8,3 +8,4 @@ build/
 bin/
 *.log
 *.data
+.ipynb_checkpoints/
