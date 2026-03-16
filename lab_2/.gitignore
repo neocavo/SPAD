@@ -1,0 +1,6 @@
+.ipynb_checkpoints/
+vhi_data/
+venv/
+*.txt
+*.csv
+*.log
