@@ -64,3 +64,56 @@ s_freq  = Slider(ax_freq,  'Частота',      0.1, 5.0, valinit=INIT_FREQUEN
 s_phase = Slider(ax_phase, 'Фаза',         0.0, 2*np.pi, valinit=INIT_PHASE)
 s_nmean = Slider(ax_nmean, 'Шум (середнє)', -1.0, 1.0, valinit=INIT_NOISE_MEAN)
 s_ncov  = Slider(ax_ncov,  'Шум (дисперсія)', 0.01, 1.0, valinit=INIT_NOISE_COV)
+
+# === Чекбокс ===
+ax_check = plt.axes([0.1, 0.10, 0.15, 0.08])
+check = CheckButtons(ax_check, ['Показати шум'], [True])
+
+# === Кнопка Reset ===
+ax_reset = plt.axes([0.8, 0.10, 0.1, 0.05])
+btn_reset = Button(ax_reset, 'Reset')
+
+def update(val):
+    # Оновлення при зміні параметрів гармоніки — шум не змінюється
+    y = harmonic_with_noise(s_amp.val, s_freq.val, s_phase.val,
+                            s_nmean.val, s_ncov.val, show_noise[0])
+    y_filtered = apply_filter(y)
+    line1.set_ydata(y)
+    line2.set_ydata(y_filtered)
+    ax1.relim(); ax1.autoscale_view()
+    ax2.relim(); ax2.autoscale_view()
+    fig.canvas.draw_idle()
+
+def update_noise(val):
+    # При зміні параметрів шуму — генеруємо новий шум
+    global noise
+    noise = np.random.normal(s_nmean.val, np.sqrt(s_ncov.val), len(t))
+    update(val)
+
+def toggle_noise(label):
+    show_noise[0] = not show_noise[0]
+    update(None)
+
+def reset(event):
+    global noise
+    s_amp.reset(); s_freq.reset(); s_phase.reset()
+    s_nmean.reset(); s_ncov.reset()
+    noise = np.random.normal(INIT_NOISE_MEAN, np.sqrt(INIT_NOISE_COV), len(t))
+    update(None)
+
+# Підключаємо події
+s_amp.on_changed(update)
+s_freq.on_changed(update)
+s_phase.on_changed(update)
+s_nmean.on_changed(update_noise)
+s_ncov.on_changed(update_noise)
+check.on_clicked(toggle_noise)
+btn_reset.on_clicked(reset)
+
+# Інструкція для користувача
+fig.text(0.1, 0.05,
+    'Інструкція: використовуй слайдери для зміни параметрів гармоніки та шуму.\n'
+    'Чекбокс вмикає/вимикає відображення шуму. Кнопка Reset повертає початкові значення.',
+    fontsize=8)
+
+plt.show()
