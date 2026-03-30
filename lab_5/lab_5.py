@@ -66,3 +66,113 @@ province_mapping = {
     22: ('Вінницька', 1), 23: ('Волинська', 2), 24: ('Запорізька', 5),
     25: ('Житомирська', 6), 26: ('Київська міська', 19), 27: ('Севастопільська', 23),
 }
+
+# === Кешуємо дані ===
+@st.cache_data
+def load_data():
+    download_vhi_data()
+    df = read_vhi_data()
+    df = clean_df(df)
+    df['province_name'] = df['province_id'].map(lambda x: province_mapping[x][0])
+    df['province_ua_id'] = df['province_id'].map(lambda x: province_mapping[x][1])
+    return df
+
+df = load_data()
+
+province_names = sorted(df['province_name'].unique())
+year_min = int(df['year'].min())
+year_max = int(df['year'].max())
+
+# === Інтерфейс ===
+st.title('Аналіз VHI даних по областях України')
+
+# === Дефолтні значення ===
+DEFAULT_SERIES = 'VHI'
+DEFAULT_PROVINCE = sorted(df['province_name'].unique())[0]
+DEFAULT_WEEK = (1, 52)
+DEFAULT_YEAR = (year_min, year_max)
+
+# Ініціалізація session_state
+if 'series' not in st.session_state:
+    st.session_state['series'] = DEFAULT_SERIES
+if 'province' not in st.session_state:
+    st.session_state['province'] = DEFAULT_PROVINCE
+if 'week_range' not in st.session_state:
+    st.session_state['week_range'] = DEFAULT_WEEK
+if 'year_range' not in st.session_state:
+    st.session_state['year_range'] = DEFAULT_YEAR
+if 'sort_asc' not in st.session_state:
+    st.session_state['sort_asc'] = False
+if 'sort_desc' not in st.session_state:
+    st.session_state['sort_desc'] = False
+
+# === Інтерфейс ===
+st.title('Аналіз VHI даних по областях України')
+# Layout: ліва колонка — елементи, права — графіки
+col_controls, col_content = st.columns([1, 3])
+
+with col_controls:
+    st.subheader('Фільтри')
+
+    if st.button('Reset'):
+        st.session_state['series'] = DEFAULT_SERIES
+        st.session_state['province'] = DEFAULT_PROVINCE
+        st.session_state['week_range'] = DEFAULT_WEEK
+        st.session_state['year_range'] = DEFAULT_YEAR
+        st.session_state['sort_asc'] = False
+        st.session_state['sort_desc'] = False
+        st.rerun()
+
+    series = st.selectbox('Часовий ряд', ['VHI', 'VCI', 'TCI'], key='series')
+    province = st.selectbox('Область', province_names, key='province')
+    week_range = st.slider('Інтервал тижнів', 1, 52, key='week_range')
+    year_range = st.slider('Інтервал років', year_min, year_max, key='year_range')
+    sort_asc = st.checkbox('Сортувати за зростанням', key='sort_asc')
+    sort_desc = st.checkbox('Сортувати за спаданням', key='sort_desc')
+
+# === Фільтрація ===
+filtered = df[
+    (df['province_name'] == province) &
+    (df['week'] >= week_range[0]) & (df['week'] <= week_range[1]) &
+    (df['year'] >= year_range[0]) & (df['year'] <= year_range[1])
+][['year', 'week', series]].copy()
+
+# Сортування — якщо обидва увімкнені, ігноруємо
+if sort_asc and not sort_desc:
+    filtered = filtered.sort_values(series, ascending=True)
+elif sort_desc and not sort_asc:
+    filtered = filtered.sort_values(series, ascending=False)
+elif sort_asc and sort_desc:
+    st.warning('Увімкнено обидва сортування — сортування ігнорується')
+
+with col_content:
+    tab1, tab2, tab3 = st.tabs(['Таблиця', 'Графік', 'Порівняння областей'])
+
+    with tab1:
+        st.dataframe(filtered, use_container_width=True)
+
+    with tab2:
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(filtered['week'].astype(str) + '-' + filtered['year'].astype(str),
+                filtered[series], color='steelblue')
+        ax.set_title(f'{series} для {province}')
+        ax.set_xlabel('Тиждень-Рік')
+        ax.set_ylabel(series)
+        plt.xticks(rotation=45, ha='right', fontsize=6)
+        ax.grid(True)
+        st.pyplot(fig)
+
+    with tab3:
+        # Порівняння обраної області з усіма іншими
+        compare = df[
+            (df['week'] >= week_range[0]) & (df['week'] <= week_range[1]) &
+            (df['year'] >= year_range[0]) & (df['year'] <= year_range[1])
+        ].groupby('province_name')[series].mean().sort_values()
+
+        fig2, ax2 = plt.subplots(figsize=(10, 6))
+        colors = ['red' if p == province else 'steelblue' for p in compare.index]
+        compare.plot(kind='barh', ax=ax2, color=colors)
+        ax2.set_title(f'Середнє {series} по всіх областях')
+        ax2.set_xlabel(f'Середнє {series}')
+        ax2.grid(True, axis='x')
+        st.pyplot(fig2)
