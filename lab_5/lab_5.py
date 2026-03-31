@@ -82,10 +82,6 @@ df = load_data()
 province_names = sorted(df['province_name'].unique())
 year_min = int(df['year'].min())
 year_max = int(df['year'].max())
-
-# === Інтерфейс ===
-st.title('Аналіз VHI даних по областях України')
-
 # === Дефолтні значення ===
 DEFAULT_SERIES = 'VHI'
 DEFAULT_PROVINCE = sorted(df['province_name'].unique())[0]
