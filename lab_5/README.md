@@ -7,7 +7,14 @@
 ## Запуск
 ```bash
 pip install -r requirements.txt
+```
+# Windows
+```bash
 py -m streamlit run lab_5.py
+```
+# Linux/MAC
+```bash
+python3 -m streamlit run lab_5.py
 ```
 
 ## Функціонал
