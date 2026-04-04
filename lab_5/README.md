@@ -10,7 +10,7 @@ pip install -r requirements.txt
 ```
 # Windows
 ```bash
-py -m streamlit run lab_5.py
+python -m streamlit run lab_5.py
 ```
 # Linux/MAC
 ```bash
