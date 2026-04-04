@@ -154,11 +154,6 @@ with col_content:
             (df['year'] >= year_range[0]) & (df['year'] <= year_range[1])
         ][['year', 'week', series]].sort_values(['year', 'week'])
 
-        if sort_asc and not sort_desc:
-            plot_data = plot_data.sort_values(series, ascending=True)
-        elif sort_desc and not sort_asc:
-            plot_data = plot_data.sort_values(series, ascending=False)
-
         fig, ax = plt.subplots(figsize=(10, 4))
         labels = plot_data['year'].astype(str) + '-W' + plot_data['week'].astype(str).str.zfill(2)
         ax.plot(labels, plot_data[series].values, color='steelblue')
