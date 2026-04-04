@@ -148,13 +148,26 @@ with col_content:
         st.dataframe(filtered, use_container_width=True)
 
     with tab2:
+        plot_data = df[
+            (df['province_name'] == province) &
+            (df['week'] >= week_range[0]) & (df['week'] <= week_range[1]) &
+            (df['year'] >= year_range[0]) & (df['year'] <= year_range[1])
+        ][['year', 'week', series]].sort_values(['year', 'week'])
+
+        if sort_asc and not sort_desc:
+            plot_data = plot_data.sort_values(series, ascending=True)
+        elif sort_desc and not sort_asc:
+            plot_data = plot_data.sort_values(series, ascending=False)
+
         fig, ax = plt.subplots(figsize=(10, 4))
-        ax.plot(filtered['week'].astype(str) + '-' + filtered['year'].astype(str),
-                filtered[series], color='steelblue')
+        labels = plot_data['year'].astype(str) + '-W' + plot_data['week'].astype(str).str.zfill(2)
+        ax.plot(labels, plot_data[series].values, color='steelblue')
+        tick_step = max(1, len(labels) // 10)
+        ax.set_xticks(range(0, len(labels), tick_step))
+        ax.set_xticklabels(labels[::tick_step], rotation=45, ha='right', fontsize=8)
+        ax.set_xlabel('Рік-Тиждень')
         ax.set_title(f'{series} для {province}')
-        ax.set_xlabel('Тиждень-Рік')
         ax.set_ylabel(series)
-        plt.xticks(rotation=45, ha='right', fontsize=6)
         ax.grid(True)
         st.pyplot(fig)
 
@@ -168,6 +181,7 @@ with col_content:
         fig2, ax2 = plt.subplots(figsize=(10, 6))
         colors = ['red' if p == province else 'steelblue' for p in compare.index]
         compare.plot(kind='barh', ax=ax2, color=colors)
+        ax2.set_ylabel('Область')
         ax2.set_title(f'Середнє {series} по всіх областях')
         ax2.set_xlabel(f'Середнє {series}')
         ax2.grid(True, axis='x')
