@@ -15,6 +15,10 @@ CameraProvider::~CameraProvider() {
 cv::Mat CameraProvider::getFrame() {
     cv::Mat frame;
     cap >> frame;
+    if (!frame.empty()) {
+        cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+        cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
+    }
     return frame;
 }
 
