@@ -23,6 +23,8 @@ int main() {
     std::cout << "S - фільтр Собеля" << std::endl;
     std::cout << "G - відтінки сірого" << std::endl;
     std::cout << "ESC - вихід" << std::endl;
+    std::cout << "ЛКМ - намалювати кружок" << std::endl;
+    std::cout << "ПКМ - прибрати кружок" << std::endl;
 
     while (true) {
         cv::Mat frame = camera.getFrame();
@@ -40,7 +42,7 @@ int main() {
         // Обробляємо натискання клавіші
         int key = cv::waitKey(30);
         if (!keyProcessor.processKey(key)) {
-            break;  // ESC — вихід
+            break;
         }
     }
 
