@@ -6,14 +6,15 @@ enum class Mode {
     BLUR,
     CANNY,
     SOBEL,
-    GRAY
+    GRAY,
+    FACE  // новий режим детекції облич
 };
 
 class KeyProcessor {
 public:
     KeyProcessor();
     Mode getMode() const;
-    bool processKey(int key);  // повертає false якщо треба вийти
+    bool processKey(int key);
 
 private:
     Mode currentMode;
