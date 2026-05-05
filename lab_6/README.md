@@ -13,7 +13,7 @@
 
 ## Клонування репозиторію
 ```bash
-git clone https://github.com/neocavo/SPAD.git
+git clone --branch lab_6 --single-branch https://github.com/neocavo/SPAD.git
 cd SPAD/lab_6
 ```
 
