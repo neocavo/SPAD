@@ -8,7 +8,7 @@ Mode KeyProcessor::getMode() const {
 
 bool KeyProcessor::processKey(int key) {
     switch (key) {
-        case 27:  // ESC — вихід
+        case 27:  // ESC
             return false;
         case 'n': case 'N':
             currentMode = Mode::NORMAL;
@@ -27,6 +27,9 @@ bool KeyProcessor::processKey(int key) {
             break;
         case 'g': case 'G':
             currentMode = Mode::GRAY;
+            break;
+        case 'f': case 'F':
+            currentMode = Mode::FACE;
             break;
     }
     return true;
