@@ -1,2 +1,2 @@
 #!/bin/bash
-./build/lab6
+./build/lab7
