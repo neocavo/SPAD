@@ -19,22 +19,22 @@ cd SPAD/lab_6
 
 ## Встановлення залежностей
 ```bash
-./preinstall.sh
+chmod +x preinstall.sh  && ./preinstall.sh 
 ```
 
 ## Збірка
 ```bash
-./build.sh
+chmod +x build.sh h &&  ./build.sh 
 ```
 
 ## Запуск
 ```bash
-./run.sh
+chmod +x run.sh && ./run.sh
 ```
 
 ## Або одною командою
 ```bash
-./preinstall.sh && ./build.sh && ./run.sh
+chmod +x preinstall.sh build.sh run.sh && ./preinstall.sh && ./build.sh && ./run.sh
 ```
 
 ## Керування
