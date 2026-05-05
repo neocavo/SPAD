@@ -1,8 +1,10 @@
 #include "FaceDetector.hpp"
+#include <thread>
+#include <chrono>
 
-FaceDetector::FaceDetector(const std::string& prototxt, const std::string& caffemodel) 
+FaceDetector::FaceDetector(const std::string& prototxt, const std::string& caffemodel)
     : loaded(false), hasNewFrame(false), running(true) {
-    
+
     // Завантажуємо нейронну мережу ResNet-10
     try {
         net = cv::dnn::readNetFromCaffe(prototxt, caffemodel);
@@ -17,7 +19,6 @@ FaceDetector::FaceDetector(const std::string& prototxt, const std::string& caffe
 }
 
 FaceDetector::~FaceDetector() {
-    // Зупиняємо потік
     running = false;
     cv.notify_all();
     if (workerThread.joinable()) {
@@ -54,11 +55,17 @@ void FaceDetector::detectionLoop() {
             hasNewFrame = false;
         }
 
-        // Детекція облич
+        // Перетворюємо кадр у формат для нейронної мережі
         cv::Mat blob = cv::dnn::blobFromImage(frame, 1.0, cv::Size(300, 300),
                                                cv::Scalar(104.0, 177.0, 123.0));
         net.setInput(blob);
+
+        // Виконуємо детекцію
         cv::Mat detections = net.forward();
+
+        // Штучна затримка для демонстрації переваги багатопотоковості
+        // Відео залишається плавним навіть при важких обчисленнях
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Парсимо результати
         std::vector<cv::Rect> faces;
@@ -68,7 +75,6 @@ void FaceDetector::detectionLoop() {
         for (int i = 0; i < detMat.rows; i++) {
             float confidence = detMat.at<float>(i, 2);
             if (confidence > 0.5f) {
-                // Координати в відносних одиницях — перетворюємо в пікселі
                 int x1 = (int)(detMat.at<float>(i, 3) * frame.cols);
                 int y1 = (int)(detMat.at<float>(i, 4) * frame.rows);
                 int x2 = (int)(detMat.at<float>(i, 5) * frame.cols);
@@ -83,7 +89,7 @@ void FaceDetector::detectionLoop() {
             }
         }
 
-        // Зберігаємо результати
+        // Зберігаємо результати під м'ютексом
         {
             std::lock_guard<std::mutex> lock(mutex);
             lastDetections = faces;
