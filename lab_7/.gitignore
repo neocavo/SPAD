@@ -1,0 +1,8 @@
+build/
+*.o
+*.a
+lab7
+.vscode/
+.idea/
+deploy.prototxt
+*.caffemodel
